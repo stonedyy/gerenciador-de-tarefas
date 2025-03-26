@@ -2,29 +2,34 @@ from flask import Flask, render_template, request, redirect
 
 app = Flask(__name__)
 
-tarefas = []
+# Lista de tarefas
+tasks = []
 
+# Página inicial
 @app.route('/')
 def index():
-    return render_template('index.html', tarefas=tarefas)
+    return render_template('index.html', tasks=tasks)
 
-@app.route('/adicionar', methods=['POST'])
-def adicionar():
-    tarefa = request.form.get('tarefa')
-    
-    # Verifica se a tarefa não está vazia e não começa com espaço
-    if tarefa and not tarefa.startswith(" "):  
-        tarefas.append(tarefa)
-        return redirect('/')
-    else:
-        # Se a tarefa for vazia ou começar com espaço, exibe uma mensagem de erro
-        erro = "Por favor, insira uma tarefa válida (não pode começar com espaço)."
-        return render_template('index.html', tarefas=tarefas, erro=erro)
-    
-@app.route('/remover/<int:index>')
-def remover(index):
-    if 0 <= index < len(tarefas):
-        del tarefas[index]
+# Adicionar uma nova tarefa
+@app.route('/add', methods=['POST'])
+def add():
+    task = request.form.get('task')
+    if task and not task.isspace():  # Validando a tarefa
+        tasks.append({'task': task, 'done': False})  # Tarefa com status 'done' como False
+    return redirect('/')
+
+# Marcar tarefa como feita
+@app.route('/mark_done/<int:index>')
+def mark_done(index):
+    if 0 <= index < len(tasks):
+        tasks[index]['done'] = True  # Atualizando o status para 'feito'
+    return redirect('/')
+
+# Remover tarefa
+@app.route('/remove/<int:index>')
+def remove(index):
+    if 0 <= index < len(tasks):
+        tasks.pop(index)
     return redirect('/')
 
 if __name__ == '__main__':
